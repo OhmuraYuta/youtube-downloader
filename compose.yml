@@ -1,0 +1,24 @@
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: youtube_downloader
+    volumes:
+      - ./app:/var/www/html
+    ports:
+      - "8000:8000"
+      - "5173:5173"
+    tty: true
+
+  db:
+    image: mysql:8.3
+    volumes:
+      - mysql_data:/var/lib/mysql
+    env_file:
+      - .env
+    ports:
+      - "3306:3306"
+
+volumes:
+  mysql_data:
