@@ -10,6 +10,9 @@ services:
       - "8000:8000"
       - "5173:5173"
     tty: true
+    networks:
+      - proxy_network
+      - default
 
   db:
     image: mysql:8.3
@@ -22,3 +25,7 @@ services:
 
 volumes:
   mysql_data:
+
+networks:
+  proxy_network:
+    external: true
