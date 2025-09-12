@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: ./
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     container_name: youtube_downloader
     volumes:
       - ./app:/var/www/html
