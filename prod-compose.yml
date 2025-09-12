@@ -6,10 +6,13 @@ services:
     container_name: youtube_downloader
     volumes:
       - ./app:/var/www/html
+      - ~/reverse-proxy/staticfiles/youtube_downloader:/var/www/html
     ports:
-      - "8000:8000"
-      - "5173:5173"
+      - "9000:9000"
     tty: true
+    networks:
+      - proxy_network
+      - default
 
   db:
     image: mysql:8.3
@@ -22,3 +25,7 @@ services:
 
 volumes:
   mysql_data:
+
+networks:
+  proxy_network:
+    external: true
