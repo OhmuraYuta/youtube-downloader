@@ -4,7 +4,7 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV COMPOSER_HOME="/opt/composer"
 ENV PATH="$PATH:/opt/composer/vendor/bin"
 RUN apk update &&\
-    apk install -y zip npm &&\
+    apk install zip npm &&\
     docker-php-ext-install pdo_mysql
 
 COPY ./app /var/www/html/youtube_downloader
