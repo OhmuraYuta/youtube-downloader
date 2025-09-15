@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DownloaderController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -16,5 +17,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::get('/', [DownloaderController::class, 'showForm']);
+
+Route::post('/download', [DownloaderController::class, 'download']);
+
+Route::get('/download/{file}', [DownloaderController::class, 'downloadFile'])->name('download.file');
 
 require __DIR__.'/auth.php';
