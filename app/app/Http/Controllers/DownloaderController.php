@@ -71,13 +71,6 @@ class DownloaderController extends Controller
                 throw new \RuntimeException($process->getErrorOutput());
             }
 
-            // 4. ダウンロード情報をセッションに保存
-            $request->session()->put('download_info', [
-                'uuid_file_name' => $uuidFileName,
-                'video_title' => $videoTitle,
-                'format' => $format
-            ]);
-
             $filePath = storage_path('app/downloads/' . $sessionId . '/' . $uuidFileName);
 
             $downloadFileName = $videoTitle . '.' . $format;
