@@ -18,7 +18,7 @@ class DownloaderController extends Controller
     {
         $request->validate([
             'url' => 'required|url',
-            'format' => 'required|in:mp4,mp3',
+            'format' => 'required|in:mp4,mp3,mov',
         ]);
 
         $url = $request->input('url');
@@ -53,6 +53,8 @@ class DownloaderController extends Controller
 
         if ($format === 'mp4') {
             array_push($command, '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]', '--merge-output-format', 'mp4');
+        } elseif ($format === 'mov'){
+            array_push($command, '-f', 'bestvideo[ext=mp4][vcodec=h264]+bestaudio[ext=m4a][acodec=aac]/best[ext=mp4]', '--merge-output-format', 'mov');
         } elseif ($format === 'mp3') {
             array_push($command, '--extract-audio', '--audio-format', 'mp3');
         }
