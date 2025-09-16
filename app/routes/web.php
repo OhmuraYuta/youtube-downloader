@@ -22,6 +22,6 @@ Route::get('/', [DownloaderController::class, 'showForm']);
 
 Route::post('/download', [DownloaderController::class, 'download']);
 
-Route::get('/download/{file}', [DownloaderController::class, 'downloadFile'])->name('download.file');
+Route::get('/download', [DownloaderController::class, 'downloadFile'])->name('download.file');
 
 require __DIR__.'/auth.php';

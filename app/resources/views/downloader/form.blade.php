@@ -19,7 +19,7 @@
         @if (session('download_link'))
             <div class="mt-4">
                 <p>ダウンロード完了！以下のリンクからどうぞ:</p>
-                <a href="{{ session('download_link') }}" class="btn btn-success" download>動画をダウンロード</a>
+                <a href="{{ session('download_link') }}" class="btn btn-success">動画をダウンロード</a>
             </div>
         @endif
 
