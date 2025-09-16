@@ -76,37 +76,16 @@ class DownloaderController extends Controller
                 'format' => $format
             ]);
 
-            $downloadLink = route('download.file');
-            
-            return back()->with('success', '動画のダウンロードが完了しました！')
-                         ->with('download_link', $downloadLink);
+            $filePath = storage_path('app/downloads/' . $sessionId . '/' . $uuidFileName);
+
+            $downloadFileName = $videoTitle . '.' . $format;
+            $downloadFileName = str_replace(['\\', '/', ':', '*', '?', '"', '<', '>', '|'], '-', $downloadFileName);
+            $response = response()->download($filePath, $downloadFileName);
+            $response->deleteFileAfterSend(true);
+            return $response;
 
         } catch (\Exception $e) {
             return back()->with('error', 'ダウンロードに失敗しました: ' . $e->getMessage());
         }
-    }
-
-    public function downloadFile(Request $request)
-    {
-        $sessionId = $request->session()->getId();
-        $downloadInfo = $request->session()->get('download_info');
-
-        if (!$downloadInfo) {
-            return back()->with('error', 'ダウンロード情報が見つかりません。再度お試しください。');
-        }
-        
-        $filePath = storage_path('app/downloads/' . $sessionId . '/' . $downloadInfo['uuid_file_name']);
-
-        if (!file_exists($filePath)) {
-            return back()->with('error', 'ファイルが見つかりません。');
-        }
-
-        $downloadFileName = $downloadInfo['video_title'] . '.' . $downloadInfo['format'];
-        $downloadFileName = str_replace(['\\', '/', ':', '*', '?', '"', '<', '>', '|'], '-', $downloadFileName);
-        $response = response()->download($filePath, $downloadFileName);
-        $response->deleteFileAfterSend(true);
-        $request->session()->forget('download_info'); // セッションから情報を削除
-
-        return $response;
     }
 }
