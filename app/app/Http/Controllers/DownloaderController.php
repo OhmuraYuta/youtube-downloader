@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Symfony\Component\Process\Process;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
+use Illuminate\Support\Facades\Log;
 
 class DownloaderController extends Controller
 {
@@ -54,7 +57,7 @@ class DownloaderController extends Controller
         if ($format === 'mp4') {
             array_push($command, '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]', '--merge-output-format', 'mp4');
         } elseif ($format === 'mov'){
-            array_push($command, '-f', 'bestvideo[ext=mp4][vcodec=h264]+bestaudio[ext=m4a][acodec=aac]/best[ext=mp4]', '--merge-output-format', 'mov');
+            array_push($command, '-f', "bv[vcodec!~='^(vp0?9|av0?1)']+ba[ext='m4a']", '--merge-output-format', 'mov');
         } elseif ($format === 'mp3') {
             array_push($command, '--extract-audio', '--audio-format', 'mp3');
         }
@@ -75,8 +78,17 @@ class DownloaderController extends Controller
 
             $downloadFileName = $videoTitle . '.' . $format;
             $downloadFileName = str_replace(['\\', '/', ':', '*', '?', '"', '<', '>', '|'], '-', $downloadFileName);
+
+            $directoryPath = 'downloads/' . $sessionId;
             $response = response()->download($filePath, $downloadFileName);
             $response->deleteFileAfterSend(true);
+
+            register_shutdown_function(function () use ($directoryPath) {
+                if (Storage::disk('app_root')->exists($directoryPath)) {
+                    Storage::disk('app_root')->deleteDirectory($directoryPath);
+                }
+            });
+            
             return $response;
 
         } catch (\Exception $e) {
