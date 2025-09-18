@@ -10,19 +10,6 @@
     <div class="container mt-5">
         <h1 class="mb-4">YouTubeダウンローダー</h1>
 
-        @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('download_link'))
-            <div class="mt-4">
-                <p>ダウンロード完了！以下のリンクからどうぞ:</p>
-                <a href="{{ session('download_link') }}" class="btn btn-success">動画をダウンロード</a>
-            </div>
-        @endif
-
         @if (session('error'))
             <div class="alert alert-danger">
                 {{ session('error') }}
