@@ -90,8 +90,12 @@ class DownloaderController extends Controller
             
             return $response;
 
-        } catch (\Exception $e) {
-            return back()->with('error', 'ダウンロードに失敗しました: ' . $e->getMessage());
+        } catch (\Exception) {
+            $directoryPath = 'downloads/' . $sessionId;
+            if (Storage::disk('app_root')->exists($directoryPath)) {
+                Storage::disk('app_root')->deleteDirectory($directoryPath);
+            }
+            return back()->with('error', 'ダウンロードに失敗しました');
         }
     }
 }
