@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Symfony\Component\Process\Process;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 use Illuminate\Support\Facades\Log;
 
