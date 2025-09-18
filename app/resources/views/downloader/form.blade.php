@@ -28,6 +28,7 @@
                 <select name="format" id="format" class="form-select">
                     <option value="mp4" selected>MP4 (動画)</option>
                     <option value="mov">MOV (動画)</option>
+                    <option value="m4a">M4A (音声)</option>
                     <option value="mp3">MP3 (音声)</option>
                 </select>
             </div>
