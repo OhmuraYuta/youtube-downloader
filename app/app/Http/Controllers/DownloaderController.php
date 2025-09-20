@@ -103,28 +103,37 @@ class DownloaderController extends Controller
         //     return back()->with('error', 'ダウンロードに失敗しました');
         // }
 
+        // 1. 各ダウンロードリクエストにユニークなIDを割り当てる
+        $jobId = (string) Str::uuid();
+
         // 3. ダウンロード処理をジョブとしてキューに投入
-        DownloadVideoJob::dispatch($url, $format, $uuidFileName, $sessionId);
+        DownloadVideoJob::dispatch($url, $format, $uuidFileName, $sessionId, $jobId);
 
         // 4. ダウンロードファイル名とUUIDをセッションに保存
         $downloadFileName = str_replace(['\\', '/', ':', '*', '?', '"', '<', '>', '|'], '-', $videoTitle);
         $downloadFileName .= '.' . $format;
         
-        Cache::put("download-info-{$sessionId}", [
+        Cache::put("download-info-{$sessionId}-{$jobId}", [
             'uuid_file_name' => $uuidFileName,
             'download_file_name' => $downloadFileName,
         ], now()->addMinutes(30));
+        // $request->session()->put('uuid_file_name', $uuidFileName);
+        // $request->session()->put('download_file_name', $downloadFileName);
 
         // 5. 成功レスポンスを返す
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'jobId' => $jobId]);
     }
 
-    public function getProgress(Request $request)
+    public function getProgress(Request $request, $jobId)
     {
         $sessionId = $request->session()->getId();
-        $cacheKey = "download-progress-{$sessionId}";
+        $cacheKey = "download-progress-{$sessionId}-{$jobId}";
 
         $progressData = Cache::get($cacheKey);
+        // $status = $request->session()->get('status');
+        // $progres = $request->session()->get('progress');
+        // $progressData = ['status' => $status, 'progress' => $progres];
+        // Log::debug('status: ' . $status);
 
         if ($progressData) {
             return response()->json($progressData);
@@ -134,18 +143,22 @@ class DownloaderController extends Controller
     }
 
     // ダウンロード完了後にファイルを提供するメソッドも必要です
-    public function serveDownload(Request $request)
+    public function serveDownload(Request $request, $jobId)
     {
         $sessionId = $request->session()->getId();
-        $cacheKey = "download-info-{$sessionId}";
+        $cacheKey = "download-info-{$sessionId}-{$jobId}";
 
         $downloadInfo = Cache::get($cacheKey);
+        // $downloadInfo = $request->session()->get('status');
         if (!$downloadInfo) {
             return back()->with('error', 'ダウンロード情報が見つかりません。');
         }
+        // $uuidFileName = $request->session()->get('uuid_file_name');
 
         $filePath = storage_path("app/downloads/{$sessionId}/{$downloadInfo['uuid_file_name']}");
+        // $filePath = storage_path("app/downloads/{$sessionId}/{$uuidFileName}");
         $downloadFileName = $downloadInfo['download_file_name'];
+        // $downloadFileName = $request->session()->get('download_file_name');
 
         if (file_exists($filePath)) {
             $response = response()->download($filePath, $downloadFileName);

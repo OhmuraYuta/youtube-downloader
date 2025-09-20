@@ -53,6 +53,9 @@ document.getElementById('download-form').addEventListener('submit', function(e) 
     const method = form.method;
     const formData = new FormData(form);
 
+    document.getElementById('download-form').style.display = 'none';
+    document.getElementById('progress-container').style.display = 'block';
+
     // フォーム送信
     fetch(url, {
         method: method,
@@ -64,13 +67,14 @@ document.getElementById('download-form').addEventListener('submit', function(e) 
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            const jobId = data.jobId;
             // フォームを非表示にし、進捗バーを表示
-            document.getElementById('download-form').style.display = 'none';
-            document.getElementById('progress-container').style.display = 'block';
+            // document.getElementById('download-form').style.display = 'none';
+            // document.getElementById('progress-container').style.display = 'block';
 
             // ポーリング開始
             const progressInterval = setInterval(function() {
-                fetch('/download-progress')
+                fetch(`/download-progress/${jobId}`)
                     .then(res => res.json())
                     .then(progressData => {
                         const progressBar = document.getElementById('progress-bar');
@@ -87,7 +91,7 @@ document.getElementById('download-form').addEventListener('submit', function(e) 
                             alert('ダウンロードが完了しました！');
 
                             // 新しいエンドポイントからファイルをダウンロードさせる
-                            window.location.href = '/serve-download';
+                            window.location.href = `/serve-download/${jobId}`;
 
                         } else if (progressData.status === 'failed') {
                             // ダウンロード失敗
