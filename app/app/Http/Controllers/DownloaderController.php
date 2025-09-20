@@ -160,6 +160,13 @@ class DownloaderController extends Controller
         $downloadFileName = $downloadInfo['download_file_name'];
         // $downloadFileName = $request->session()->get('download_file_name');
 
+        $directoryPath = 'downloads/' . $sessionId;
+        register_shutdown_function(function () use ($directoryPath) {
+            if (Storage::disk('app_root')->exists($directoryPath)) {
+                Storage::disk('app_root')->deleteDirectory($directoryPath);
+            }
+        });
+        
         if (file_exists($filePath)) {
             $response = response()->download($filePath, $downloadFileName);
             $response->deleteFileAfterSend(true);
