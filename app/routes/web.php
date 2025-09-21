@@ -24,7 +24,6 @@ Route::post('/download', [DownloaderController::class, 'download']);
 
 Route::get('/download', [DownloaderController::class, 'downloadFile'])->name('download.file');
 
-// 新しいルート
 Route::get('/download-progress/{jobId}', [DownloaderController::class, 'getProgress']);
 
 Route::get('/serve-download/{jobId}', [DownloaderController::class, 'serveDownload']);

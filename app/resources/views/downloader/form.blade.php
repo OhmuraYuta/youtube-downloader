@@ -68,9 +68,6 @@ document.getElementById('download-form').addEventListener('submit', function(e) 
     .then(data => {
         if (data.success) {
             const jobId = data.jobId;
-            // フォームを非表示にし、進捗バーを表示
-            // document.getElementById('download-form').style.display = 'none';
-            // document.getElementById('progress-container').style.display = 'block';
 
             // ポーリング開始
             const progressInterval = setInterval(function() {

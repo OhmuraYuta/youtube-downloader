@@ -8,15 +8,12 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Symfony\Component\Process\Process;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class DownloadVideoJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    // protected $request;
+    
     protected $url;
     protected $format;
     protected $uuidFileName;
@@ -25,7 +22,6 @@ class DownloadVideoJob implements ShouldQueue
 
     public function __construct($url, $format, $uuidFileName, $sessionId, $jobId)
     {
-        // $this->request = $request;
         $this->url = $url;
         $this->format = $format;
         $this->uuidFileName = $uuidFileName;
@@ -40,10 +36,6 @@ class DownloadVideoJob implements ShouldQueue
 
         // ダウンロードの進捗状況を初期化
         Cache::put($cacheKey, ['status' => 'pending', 'progress' => 0], now()->addMinutes(30));
-        // Session::setId($this->sessionId);
-        // Session::start();
-        // Session::put('status', 'pensing');
-        // Session::put('progress', 0);
 
         // ダウンロードコマンドを構築
         $command = ['yt-dlp', '--progress', '--newline', '--no-warnings', '--embed-thumbnail', '-o', $outputPath];
@@ -71,8 +63,6 @@ class DownloadVideoJob implements ShouldQueue
                         $progress = (float) $matches[1];
                         // 進捗状況をキャッシュに保存
                         Cache::put($cacheKey, ['status' => 'downloading', 'progress' => $progress], now()->addMinutes(30));
-                        // Session::put('status', 'downloading');
-                        // Session::put('progress', $progress);
                     }
                 }
             });
@@ -83,17 +73,10 @@ class DownloadVideoJob implements ShouldQueue
 
             // 完了ステータスをキャッシュに保存
             Cache::put($cacheKey, ['status' => 'completed', 'progress' => 100], now()->addMinutes(30));
-            // Session::put('status', 'completed');
-            // Session::put('progress', 100);
-
-            // $session_content = Session::all();
-            // Log::debug('session: ' . $session_content);
-            // dd('session: ' . $session_content);
 
         } catch (\Exception $e) {
             // エラー時はエラー情報をキャッシュに保存
             Cache::put($cacheKey, ['status' => 'failed'], now()->addMinutes(30));
-            // Session::put('status', 'failed');
         }
     }
 }

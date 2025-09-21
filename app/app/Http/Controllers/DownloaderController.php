@@ -51,58 +51,6 @@ class DownloaderController extends Controller
             mkdir($outputDir, 0777, true);
         }
 
-        // $outputPath = $outputDir . '/' . $uuidFileName;
-
-        // // 3. ダウンロードコマンドを構築
-        // $command = ['yt-dlp', '--embed-thumbnail', '-o', $outputPath];
-
-        // if ($format === 'mp4') {
-        //     array_push($command, '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]', '--merge-output-format', 'mp4');
-        // } elseif ($format === 'mov'){
-        //     array_push($command, '-f', "bv[vcodec!~='^(vp0?9|av0?1)']+ba[ext='m4a']", '--merge-output-format', 'mov');
-        // }elseif ($format === 'm4a') {
-        //     array_push($command, '--extract-audio', '--audio-format', 'm4a');
-        // } elseif ($format === 'mp3') {
-        //     array_push($command, '--extract-audio', '--audio-format', 'mp3');
-        // }
-
-        // array_push($command, $url);
-        
-        // $process = new Process($command);
-        // $process->setTimeout(3600);
-
-        // try {
-        //     $process->run();
-
-        //     if (!$process->isSuccessful()) {
-        //         throw new \RuntimeException($process->getErrorOutput());
-        //     }
-
-        //     $filePath = storage_path('app/downloads/' . $sessionId . '/' . $uuidFileName);
-
-        //     $downloadFileName = $videoTitle . '.' . $format;
-        //     $downloadFileName = str_replace(['\\', '/', ':', '*', '?', '"', '<', '>', '|'], '-', $downloadFileName);
-
-        //     $directoryPath = 'downloads/' . $sessionId;
-        //     $response = response()->download($filePath, $downloadFileName);
-        //     $response->deleteFileAfterSend(true);
-
-        //     register_shutdown_function(function () use ($directoryPath) {
-        //         if (Storage::disk('app_root')->exists($directoryPath)) {
-        //             Storage::disk('app_root')->deleteDirectory($directoryPath);
-        //         }
-        //     });
-            
-        //     return $response;
-
-        // } catch (\Exception) {
-        //     $directoryPath = 'downloads/' . $sessionId;
-        //     if (Storage::disk('app_root')->exists($directoryPath)) {
-        //         Storage::disk('app_root')->deleteDirectory($directoryPath);
-        //     }
-        //     return back()->with('error', 'ダウンロードに失敗しました');
-        // }
-
         // 1. 各ダウンロードリクエストにユニークなIDを割り当てる
         $jobId = (string) Str::uuid();
 
@@ -117,8 +65,6 @@ class DownloaderController extends Controller
             'uuid_file_name' => $uuidFileName,
             'download_file_name' => $downloadFileName,
         ], now()->addMinutes(30));
-        // $request->session()->put('uuid_file_name', $uuidFileName);
-        // $request->session()->put('download_file_name', $downloadFileName);
 
         // 5. 成功レスポンスを返す
         return response()->json(['success' => true, 'jobId' => $jobId]);
@@ -130,10 +76,6 @@ class DownloaderController extends Controller
         $cacheKey = "download-progress-{$sessionId}-{$jobId}";
 
         $progressData = Cache::get($cacheKey);
-        // $status = $request->session()->get('status');
-        // $progres = $request->session()->get('progress');
-        // $progressData = ['status' => $status, 'progress' => $progres];
-        // Log::debug('status: ' . $status);
 
         if ($progressData) {
             return response()->json($progressData);
@@ -149,16 +91,13 @@ class DownloaderController extends Controller
         $cacheKey = "download-info-{$sessionId}-{$jobId}";
 
         $downloadInfo = Cache::get($cacheKey);
-        // $downloadInfo = $request->session()->get('status');
+
         if (!$downloadInfo) {
             return back()->with('error', 'ダウンロード情報が見つかりません。');
         }
-        // $uuidFileName = $request->session()->get('uuid_file_name');
 
         $filePath = storage_path("app/downloads/{$sessionId}/{$downloadInfo['uuid_file_name']}");
-        // $filePath = storage_path("app/downloads/{$sessionId}/{$uuidFileName}");
         $downloadFileName = $downloadInfo['download_file_name'];
-        // $downloadFileName = $request->session()->get('download_file_name');
 
         $directoryPath = 'downloads/' . $sessionId;
         register_shutdown_function(function () use ($directoryPath) {
@@ -166,7 +105,7 @@ class DownloaderController extends Controller
                 Storage::disk('app_root')->deleteDirectory($directoryPath);
             }
         });
-        
+
         if (file_exists($filePath)) {
             $response = response()->download($filePath, $downloadFileName);
             $response->deleteFileAfterSend(true);
