@@ -13,7 +13,7 @@ services:
     networks:
       - proxy_network
       - default
-    command: php artisan queue:work
+    command: /bin/sh -c "php /var/www/html/artisan queue:work"
 
   db:
     image: mysql:8.3
