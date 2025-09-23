@@ -6,6 +6,7 @@
     <title>YouTubeダウンローダー</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="shortcut icon" href="{{ asset('favicon.png') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4330955739769594" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -35,14 +36,10 @@
             </div>
             <button type="submit" class="btn btn-primary" id="btn">ダウンロード</button>
         </form>
-    <div id="progress-container" style="display:none;">
-        <p>ダウンロード中...</p>
-        <div id="progress-bar-container" style="width: 100%; background-color: #f3f3f3; border-radius: 5px;">
-            <div id="progress-bar" style="width: 0%; height: 20px; background-color: #4CAF50; text-align: center; line-height: 20px; color: white; border-radius: 5px;">
-                0%
-            </div>
+        <div class="text-center" id="spinner-box" style="display: none;">
+            <div id="spinner" class="mx-auto mb-3"></div>
+            <p>ダウンロード中...</p>
         </div>
-    </div>
     </div>
 <script>
 document.getElementById('download-form').addEventListener('submit', function(e) {
@@ -54,7 +51,7 @@ document.getElementById('download-form').addEventListener('submit', function(e) 
     const formData = new FormData(form);
 
     document.getElementById('download-form').style.display = 'none';
-    document.getElementById('progress-container').style.display = 'block';
+    document.getElementById('spinner-box').style.display = 'block';
 
     // フォーム送信
     fetch(url, {
@@ -74,21 +71,17 @@ document.getElementById('download-form').addEventListener('submit', function(e) 
                 fetch(`/download-progress/${jobId}`)
                     .then(res => res.json())
                     .then(progressData => {
-                        const progressBar = document.getElementById('progress-bar');
-                        
-                        if (progressData.status === 'downloading') {
-                            const progress = Math.floor(progressData.progress);
-                            progressBar.style.width = progress + '%';
-                            progressBar.textContent = progress + '%';
-                        } else if (progressData.status === 'completed') {
-                            // ダウンロード完了
+
+                        if (progressData.status === 'completed') {
+
                             clearInterval(progressInterval);
-                            progressBar.style.width = '100%';
-                            progressBar.textContent = '100%';
-                            alert('ダウンロードが完了しました！');
+                            document.getElementById('spinner-box').style.display = 'none';
 
                             // 新しいエンドポイントからファイルをダウンロードさせる
                             window.location.href = `/serve-download/${jobId}`;
+                            setTimeout(() => {
+                                window.location.href = '/'; // 任意のURLに変更
+                            }, 3000); 
 
                         } else if (progressData.status === 'failed') {
                             // ダウンロード失敗
@@ -96,7 +89,7 @@ document.getElementById('download-form').addEventListener('submit', function(e) 
                             alert('ダウンロードに失敗しました: ' + progressData.message);
                             // エラー後、フォームを再表示
                             document.getElementById('download-form').style.display = 'block';
-                            document.getElementById('progress-container').style.display = 'none';
+                            document.getElementById('spinner-box').style.display = 'none';
                         }
                     })
                     .catch(error => {

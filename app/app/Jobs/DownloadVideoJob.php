@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Cache;
 class DownloadVideoJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    
+
     protected $url;
     protected $format;
     protected $uuidFileName;
@@ -56,16 +56,7 @@ class DownloadVideoJob implements ShouldQueue
         $process->setTimeout(3600);
 
         try {
-            $process->run(function ($type, $buffer) use ($cacheKey) {
-                if (Process::OUT === $type) {
-                    // yt-dlpの進捗表示を正規表現で解析
-                    if (preg_match('/\[download\]\s+(\d+\.\d+)% of/i', $buffer, $matches)) {
-                        $progress = (float) $matches[1];
-                        // 進捗状況をキャッシュに保存
-                        Cache::put($cacheKey, ['status' => 'downloading', 'progress' => $progress], now()->addMinutes(30));
-                    }
-                }
-            });
+            $process->run();
 
             if (!$process->isSuccessful()) {
                 throw new \RuntimeException($process->getErrorOutput());
