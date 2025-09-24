@@ -13,7 +13,6 @@ services:
     networks:
       - proxy_network
       - default
-    command: /bin/sh -c "php /var/www/html/youtube_downloader/artisan queue:work"
 
   db:
     image: mysql:8.3
