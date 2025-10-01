@@ -90,6 +90,13 @@ document.getElementById('download-form').addEventListener('submit', function(e) 
                             // エラー後、フォームを再表示
                             document.getElementById('download-form').style.display = 'block';
                             document.getElementById('spinner-box').style.display = 'none';
+                        } else if (progressData.status === 'error-1') {
+                            // ダウンロード失敗
+                            clearInterval(progressInterval);
+                            alert('フォーマットが対応していません');
+                            // エラー後、フォームを再表示
+                            document.getElementById('download-form').style.display = 'block';
+                            document.getElementById('spinner-box').style.display = 'none';
                         }
                     })
                     .catch(error => {

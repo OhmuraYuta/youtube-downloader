@@ -9,6 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Symfony\Component\Process\Process;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class DownloadVideoJob implements ShouldQueue
 {
@@ -67,7 +68,12 @@ class DownloadVideoJob implements ShouldQueue
 
         } catch (\Exception $e) {
             // エラー時はエラー情報をキャッシュに保存
-            Cache::put($cacheKey, ['status' => 'failed'], now()->addMinutes(30));
+            if (str_contains($e, "Requested format is not available.")) {
+                Cache::put($cacheKey, ['status' => 'error-1'], now()->addMinutes(30));
+            } else {
+                Cache::put($cacheKey, ['status' => 'failed'], now()->addMinutes(30));
+            }
+            Log::error('ダウンロードエラー' . $e);
         }
     }
 }
