@@ -6,6 +6,7 @@
     <title>YouTubeダウンローダー</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="shortcut icon" href="{{ asset('favicon.png') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4330955739769594" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -18,7 +19,7 @@
             </div>
         @endif
 
-        <form action="{{ url('/download') }}" method="POST">
+        <form action="{{ url('/download') }}" method="POST" id="download-form">
             @csrf
             <div class="mb-3">
                 <label for="url" class="form-label">YouTube URL</label>
@@ -33,8 +34,90 @@
                     <option value="mp3">MP3 (音声)</option>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">ダウンロード</button>
+            <button type="submit" class="btn btn-primary" id="btn">ダウンロード</button>
         </form>
+        <div class="text-center" id="spinner-box" style="display: none;">
+            <div id="spinner" class="mx-auto mb-3"></div>
+            <p>ダウンロード中...</p>
+        </div>
     </div>
+<script>
+document.getElementById('download-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const url = form.action;
+    const method = form.method;
+    const formData = new FormData(form);
+
+    document.getElementById('download-form').style.display = 'none';
+    document.getElementById('spinner-box').style.display = 'block';
+
+    // フォーム送信
+    fetch(url, {
+        method: method,
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('#download-form > input[type=hidden]').value
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error();
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            const jobId = data.jobId;
+
+            // ポーリング開始
+            const progressInterval = setInterval(function() {
+                fetch(`/download-progress/${jobId}`)
+                    .then(res => res.json())
+                    .then(progressData => {
+
+                        if (progressData.status === 'completed') {
+
+                            clearInterval(progressInterval);
+                            document.getElementById('spinner-box').style.display = 'none';
+
+                            // 新しいエンドポイントからファイルをダウンロードさせる
+                            window.location.href = `/serve-download/${jobId}`;
+                            setTimeout(() => {
+                                window.location.href = '/'; // 任意のURLに変更
+                            }, 3000); 
+
+                        } else if (progressData.status === 'failed') {
+                            // ダウンロード失敗
+                            clearInterval(progressInterval);
+                            alert('ダウンロードに失敗しました: ' + progressData.message);
+                            // エラー後、フォームを再表示
+                            document.getElementById('download-form').style.display = 'block';
+                            document.getElementById('spinner-box').style.display = 'none';
+                        } else if (progressData.status === 'error-1') {
+                            // ダウンロード失敗
+                            clearInterval(progressInterval);
+                            alert('フォーマットが対応していません');
+                            // エラー後、フォームを再表示
+                            document.getElementById('download-form').style.display = 'block';
+                            document.getElementById('spinner-box').style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching progress:', error);
+                        clearInterval(progressInterval);
+                    });
+            }, 1000); // 1秒ごとにポーリング
+        } else {
+            alert('ダウンロードを開始できませんでした。');
+        }
+    })
+    .catch(error => {
+        alert('error');
+        window.location.href = '/';
+    });
+});
+</script>
 </body>
 </html>

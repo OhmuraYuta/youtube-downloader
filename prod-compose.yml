@@ -13,6 +13,8 @@ services:
     networks:
       - proxy_network
       - default
+    depends_on:
+      - db
 
   db:
     image: mysql:8.3
