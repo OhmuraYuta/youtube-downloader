@@ -43,7 +43,7 @@ class DownloadVideoJob implements ShouldQueue
         
         // フォーマットに応じたオプションを追加
         if ($this->format === 'mp4') {
-            array_push($command, '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]', '--merge-output-format', 'mp4');
+            array_push($command, '--merge-output-format', 'mp4');
         } elseif ($this->format === 'mov') {
             array_push($command, '-f', "bv[vcodec!~='^(vp0?9|av0?1)']+ba[ext='m4a']", '--merge-output-format', 'mov');
         } elseif ($this->format === 'm4a') {
@@ -55,17 +55,17 @@ class DownloadVideoJob implements ShouldQueue
         
         $process = new Process($command);
         $process->setTimeout(3600);
-
+        
         try {
             $process->run();
-
+            
             if (!$process->isSuccessful()) {
                 throw new \RuntimeException($process->getErrorOutput());
             }
-
+            
             // 完了ステータスをキャッシュに保存
             Cache::put($cacheKey, ['status' => 'completed', 'progress' => 100], now()->addMinutes(30));
-
+            
         } catch (\Exception $e) {
             // エラー時はエラー情報をキャッシュに保存
             if (str_contains($e, "Requested format is not available.")) {
@@ -74,6 +74,7 @@ class DownloadVideoJob implements ShouldQueue
                 Cache::put($cacheKey, ['status' => 'failed'], now()->addMinutes(30));
             }
             Log::error('ダウンロードエラー' . $e);
+            Log::error('command: ' . print_r($command, true));
         }
     }
 }
