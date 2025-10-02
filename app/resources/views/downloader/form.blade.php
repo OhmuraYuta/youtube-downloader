@@ -61,7 +61,12 @@ document.getElementById('download-form').addEventListener('submit', function(e) 
             'X-CSRF-TOKEN': document.querySelector('#download-form > input[type=hidden]').value
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error();
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             const jobId = data.jobId;
@@ -109,7 +114,8 @@ document.getElementById('download-form').addEventListener('submit', function(e) 
         }
     })
     .catch(error => {
-        console.error('Error starting download:', error);
+        alert('error');
+        window.location.href = '/';
     });
 });
 </script>
