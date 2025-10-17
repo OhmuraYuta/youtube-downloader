@@ -1,3 +1,3 @@
-#!/bin/bash
-npm run dev
-php artisan serve --host=0.0.0.0
+#!/bin/sh
+supervisord -c /etc/supervisord.conf
+supervisorctl start all

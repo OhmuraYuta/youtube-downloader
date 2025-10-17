@@ -11,3 +11,6 @@ COPY ./app /var/www/html/youtube_downloader
 COPY ./laravel-worker.conf /etc/supervisor/conf.d/
 COPY ./supervisord.conf /etc/supervisord.conf
 WORKDIR /var/www/html/youtube_downloader
+
+COPY ./startup.sh /startup.sh
+CMD ["sh", "/startup.sh"]
