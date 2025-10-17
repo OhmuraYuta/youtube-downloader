@@ -13,4 +13,4 @@ COPY ./supervisord.conf /etc/supervisord.conf
 WORKDIR /var/www/html/youtube_downloader
 
 COPY ./startup.sh /startup.sh
-CMD ["sh", "/startup.sh"]
+CMD ["sh", "/startup.sh", "&&", "docker-php-entrypoint", "php-fpm"]
