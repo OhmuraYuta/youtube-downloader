@@ -13,6 +13,7 @@ services:
     networks:
       - proxy_network
       - default
+    restart: always
     depends_on:
       - db
 
@@ -24,6 +25,7 @@ services:
       - .env
     ports:
       - "3306:3306"
+    restart: always
 
 volumes:
   mysql_data:
