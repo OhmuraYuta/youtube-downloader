@@ -11,7 +11,8 @@ services:
       - "5173:5173"
     tty: true
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: mysql:8.3
@@ -21,6 +22,11 @@ services:
       - .env
     ports:
       - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   mysql_data:
