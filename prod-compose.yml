@@ -26,6 +26,8 @@ services:
     ports:
       - "3306:3306"
     restart: always
+    networks:
+      - default
 
 volumes:
   mysql_data:
