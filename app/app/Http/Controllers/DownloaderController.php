@@ -40,6 +40,7 @@ class DownloaderController extends Controller
             $info = json_decode($infoProcess->getOutput(), true);
             $videoTitle = $info['title'] ?? 'download';
         } catch (\Exception $e) {
+            Log::error('動画情報取得に失敗: ' . $e);
             return back()->with('error', '動画情報の取得に失敗しました。');
         }
 
@@ -61,6 +62,8 @@ class DownloaderController extends Controller
         $downloadFileName = str_replace(['\\', '/', ':', '*', '?', '"', '<', '>', '|'], '-', $videoTitle);
         $downloadFileName .= '.' . $format;
         
+        Log::debug('dispatched');
+
         Cache::put("download-info-{$sessionId}-{$jobId}", [
             'uuid_file_name' => $uuidFileName,
             'download_file_name' => $downloadFileName,

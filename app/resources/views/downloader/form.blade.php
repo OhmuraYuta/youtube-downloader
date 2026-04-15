@@ -114,7 +114,7 @@ document.getElementById('download-form').addEventListener('submit', function(e) 
         }
     })
     .catch(error => {
-        alert('error');
+        alert(error);
         window.location.href = '/';
     });
 });
